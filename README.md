@@ -1,74 +1,43 @@
-# Custom Review Generator - API & Caching Engine
+# Just exploring: A Custom Review Generator API
 
-A high-performance, robust backend engine for generating pseudo-random yet completely **deterministic** product reviews. 
+Hey there! 👋 This is just a little side project I've been working on to explore some backend concepts. I wanted to see if I could build a review generator that doesn't rely on expensive AI APIs or a clunky database, but instead uses some cool math to generate reviews deterministically. 
 
-This project is built using Python and FastAPI, focusing on practical backend architecture, system design, and algorithms. It demonstrates how to serve computed data via a REST API while optimizing performance using a custom-built caching layer.
+Basically, the idea is that if you put the same product ID in, you always get the exact same reviews out. It's pretty fun!
 
-## Architectural Highlights
+## What I was trying out
 
-1. **Deterministic Generation (Math)**: 
-   - Uses an **FNV-1a hash** to convert a string Product ID into a 32-bit seed.
-   - Uses a **Linear Congruential Generator (LCG)** to produce deterministic pseudo-random sequences to pick names and review texts.
-2. **FastAPI Backend (Web Architecture)**: 
-   - Asynchronous RESTful API for generating and retrieving reviews.
-   - Includes data validation and automatic interactive documentation (Swagger UI).
-3. **Custom LRU Cache (Algorithms & Data Structures)**:
-   - A from-scratch implementation of a **Least Recently Used (LRU) Cache** using a Hash Map and Doubly Linked List.
-   - Achieves O(1) time complexity for reads and writes, preventing the engine from wastefully recalculating reviews for frequently visited products.
-4. **Token Bucket Rate Limiter (Security)**:
-   - Custom dependency injection to prevent API abuse by limiting request bursts per IP address.
+I mostly used this to practice and explore a few different things:
 
-## Project Structure
+1. **Math instead of AI**: I used an FNV-1a hash and a Linear Congruential Generator (LCG) to make the pseudo-randomness. It sounds complicated, but it's basically just a fast way to map a string to a predictable sequence of numbers. 
+2. **FastAPI**: I wanted to play around with FastAPI since everyone seems to be using it these days. It was super quick to set up the endpoints.
+3. **Writing an LRU Cache from scratch**: Instead of just using Python's built-in `@lru_cache`, I thought it would be a cool challenge to build my own using a Doubly Linked List and a Hash Map. It saves the server from recalculating reviews if the same product is requested back-to-back.
+4. **Rate Limiting**: I added a quick Token Bucket rate limiter just to see how dependency injection works in FastAPI and keep the API from being spammed.
 
-```
-├── api/                          # FastAPI Web Application
-│   ├── main.py                   # API Endpoints & App definition
-│   └── dependencies.py           # Rate Limiter & Dependencies
-├── review_generator/             # Core Engine Package
-│   ├── engine.py                 # Math (FNV-1a Hash, LCG)
-│   ├── cache.py                  # Custom LRU Cache Algorithm
-│   ├── generator.py              # Review orchestration
-│   ├── data.py                   # String pools
-│   └── models.py                 # Review Data models
-├── cli.py                        # Legacy CLI tool
-├── requirements.txt              # Project dependencies
-└── tests/                        # Comprehensive Test Suites
-    ├── test_api.py               # API & Rate Limit testing
-    ├── test_cache.py             # LRU Cache eviction testing
-    ├── test_engine.py            # Math testing
-    └── test_generator.py
-```
+## What's inside
 
-## Installation
+- `api/` - This is where the FastAPI app lives.
+- `review_generator/` - The actual core logic. The math, the cache, and the data pools are all in here.
+- `tests/` - I wrote a bunch of unit tests (using `pytest`) to make sure my custom cache actually evicts things correctly and that the math is actually deterministic.
 
-Ensure you have Python 3.7+ installed.
+## How to run it
 
-```bash
-git clone <your-repo-url>
-cd "Custom Review Generator"
-pip install -r requirements.txt
-```
+If you want to mess around with it, feel free to clone it. You'll need Python installed.
 
-## Running the API
+1. Install the stuff:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-Start the FastAPI development server:
+2. Spin up the server:
+   ```bash
+   uvicorn api.main:app --reload
+   ```
 
-```bash
-uvicorn api.main:app --reload
-```
+3. Open up your browser and go to `http://127.0.0.1:8000/docs`. FastAPI automatically makes this cool Swagger UI where you can test the endpoints right in the browser. 
 
-The API will be available at `http://127.0.0.1:8000`.
-
-### Endpoints
-
-- **`GET /docs`**: Interactive Swagger UI documentation.
-- **`GET /reviews/{product_id}?count=4`**: Generates (or retrieves from cache) reviews for a specific product.
-- **`GET /system/cache/stats`**: View current cache utilization.
-
-## Running Tests
-
-To run the unit tests and verify the deterministic properties and cache evictions:
-
+You can also run the tests if you want to see them pass:
 ```bash
 pytest tests/
 ```
+
+Anyway, that's pretty much it! Just a fun weekend-style project exploring FastAPI and some data structures. Let me know if you break it! 😅
